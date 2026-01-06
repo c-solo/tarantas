@@ -1,7 +1,7 @@
 //! Inner bus modules for the STM32 firmware.
 
 use defmt::Format;
-use protocol::Sensor;
+use protocol::sensors::Sensor;
 
 pub mod bus;
 

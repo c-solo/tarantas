@@ -5,7 +5,7 @@ use crate::{
     system::reflex::emergency_stop,
 };
 use defmt::error;
-use protocol::Sensor;
+use protocol::sensors::Sensor;
 
 /// Handles all inner system errors.
 /// Some errors trigger an emergency stop, while others are logged and sent via network to main system.

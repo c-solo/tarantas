@@ -7,6 +7,9 @@ edition = "2024"
 path = "src/lib.rs"
 
 [dependencies]
+serde = { version = "1.0", default-features = false, features = ["derive"] }
+defmt = {  version = "1" , optional = true }
 
-defmt.workspace = true
-embassy-sync.workspace = true
+[features]
+default = []
+defmt = ["dep:defmt"]

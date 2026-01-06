@@ -1,5 +1,5 @@
 use crate::network::Connection;
-use protocol::{EngineCommand, EngineEvent, Error};
+use protocol::{Command, EngineEvent, Error};
 
 pub struct SerialConnection {
     // TODO: implement
@@ -12,7 +12,7 @@ impl SerialConnection {
 }
 
 impl Connection for SerialConnection {
-    async fn send_cmd(&self, _cmd: EngineCommand) -> Result<(), Error> {
+    async fn send_cmd(&self, _cmd: Command) -> Result<(), Error> {
         todo!()
     }
 

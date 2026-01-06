@@ -5,7 +5,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-protocol = { path = "../../protocol" }
+protocol = { path = "../../protocol", features = ["defmt"] }
 
 defmt.workspace = true
 static_cell.workspace = true

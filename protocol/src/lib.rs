@@ -2,34 +2,47 @@
 
 #![no_std]
 
-// TODO: Design
+use serde::{Deserialize, Serialize};
 
 pub mod movements;
 pub mod sensors;
+mod system;
 
 /// Commands sent from Main system (Rpi5) to Engine (STM32 MCU).
-#[derive(defmt::Format)]
-pub enum EngineCommand {
+/// There is no direct response to commands (fire and forget), instead Engine sends [`Report`]
+/// messages back instantly or periodically.
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
+pub enum Command {
     Move(movements::MoveCmd),
     Sensor(sensors::SensorCmd),
+    System(system::SystemCmd),
 }
 
-pub enum Error {}
-
-#[derive(defmt::Format)]
-pub enum Sensor {
-    /// Mesures distance, detects obstacle.
-    Distance,
-    /// Detects no ground under the robot (cliffs, stairs).
-    Cliff,
-    /// Inertial Measurement Unit, measures acceleration and rotation.
-    Imu,
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
+pub enum Error {
+    // todo finish
 }
 
-#[derive(defmt::Format)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
+pub enum Report {
+    /// Periodic updates from various sensors.
+    Telemetry(sensors::Data),
+    /// Immediate engine events.
+    Event(EngineEvent),
+    /// Response to ping command with the same nonce.
+    Pong(u32),
+    /// System error report.
+    Error(Error),
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum EngineEvent {
     Ready,
     EmergencyStop,
     LowBattery,
-    Unavailable(Sensor),
+    Unavailable(sensors::Sensor),
 }

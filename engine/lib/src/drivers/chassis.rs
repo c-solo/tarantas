@@ -1,5 +1,6 @@
 //! Driver for chassis hardware components.
 
+use crate::bus::bus::MOVE_CMD_SIGNAL;
 use embassy_stm32::{
     gpio::OutputType,
     peripherals,
@@ -10,7 +11,6 @@ use embassy_stm32::{
     },
     Peri,
 };
-use protocol::movements::MOVE_CMD_SIGNAL;
 
 /// Skid-steer chassis with 4 wheels driven by two drivers (`BTS7960`).
 /// Each driver controls two motors on one side (left/right).

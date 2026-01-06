@@ -2,11 +2,11 @@
 //! Planning and higher level control should be handled by rpi via UPD.
 
 use crate::{
-    bus::{SystemError, LED_SIGNAL},
+    bus::{bus::MOVE_CMD_SIGNAL, SystemError, LED_SIGNAL},
     drivers::led::LedCmd,
 };
 use defmt::error;
-use protocol::movements::{MoveCmd, MOVE_CMD_SIGNAL};
+use protocol::movements::MoveCmd;
 
 /// Trigger an emergency stop due to the given cause.
 pub fn emergency_stop(cause: SystemError) {

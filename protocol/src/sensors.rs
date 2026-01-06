@@ -1,24 +1,31 @@
-use crate::Sensor;
-use embassy_sync::{blocking_mutex::raw::CriticalSectionRawMutex, channel::Channel};
-
-/// Request sensors channel.
-pub static SENSOR_CMD_CH: Channel<CriticalSectionRawMutex, SensorCmd, 10> = Channel::new();
-
-/// Response sensors channel with telemetry data.
-pub static TELEMETRY_CH: Channel<CriticalSectionRawMutex, Telemetry, 10> = Channel::new();
+use serde::{Deserialize, Serialize};
 
 /// Subscribe commands for various sensors.
-/// Where u64 is the interval in milliseconds.
-#[derive(defmt::Format)]
+/// After subscription, sensors will start sending [`Data`] data at specified intervals.
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum SensorCmd {
     SubscribeTo {
         sensor: Sensor,
-        poll_interval_ms: u64,
+        poll_interval_ms: u32,
     },
 }
 
 /// Telemetry data from various sensors.
-pub enum Telemetry {
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
+pub enum Data {
     DistanceFront { mm: u16 },
     DistanceBack { mm: u16 },
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
+pub enum Sensor {
+    /// Mesures distance, detects obstacle.
+    Distance,
+    /// Detects no ground under the robot (cliffs, stairs).
+    Cliff,
+    /// Inertial Measurement Unit, measures acceleration and rotation.
+    Imu,
 }

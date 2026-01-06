@@ -5,14 +5,15 @@ use embassy_stm32::{
     mode::Blocking,
 };
 use embassy_time::{with_timeout, Duration, Instant};
-use protocol::{
-    sensors::{SensorCmd, Telemetry, SENSOR_CMD_CH, TELEMETRY_CH},
-    Sensor,
-};
+use protocol::sensors::{Data, SensorCmd};
 use static_cell::StaticCell;
 
-use crate::bus::{SystemError, ERROR_CH};
+use crate::bus::{
+    bus::{SENSOR_CMD_CH, TELEMETRY_CH},
+    SystemError, ERROR_CH,
+};
 use distance::DistanceSensor;
+use protocol::sensors::Sensor;
 
 pub mod cliff;
 pub mod distance;
@@ -33,7 +34,7 @@ pub async fn sensor_polling(mut front_dist: DistanceSensor, mut back_dist: Dista
 
         if front_dist.ready(now) {
             match front_dist.read_distance_mm() {
-                Ok(mm) => TELEMETRY_CH.send(Telemetry::DistanceFront { mm }).await,
+                Ok(mm) => TELEMETRY_CH.send(Data::DistanceFront { mm }).await,
                 Err(err) => {
                     warn!("Front distance sensor error: {:?}", err);
                     ERROR_CH
@@ -46,7 +47,7 @@ pub async fn sensor_polling(mut front_dist: DistanceSensor, mut back_dist: Dista
 
         if back_dist.ready(now) {
             match back_dist.read_distance_mm() {
-                Ok(mm) => TELEMETRY_CH.send(Telemetry::DistanceBack { mm }).await,
+                Ok(mm) => TELEMETRY_CH.send(Data::DistanceBack { mm }).await,
                 Err(e) => {
                     warn!("Back distance sensor error: {:?}", e);
                     ERROR_CH
@@ -68,8 +69,8 @@ pub async fn sensor_polling(mut front_dist: DistanceSensor, mut back_dist: Dista
                     sensor: Sensor::Distance,
                     poll_interval_ms,
                 } => {
-                    front_dist.set_poll_interval(Duration::from_millis(poll_interval_ms));
-                    back_dist.set_poll_interval(Duration::from_millis(poll_interval_ms));
+                    front_dist.set_poll_interval(Duration::from_millis(poll_interval_ms as u64));
+                    back_dist.set_poll_interval(Duration::from_millis(poll_interval_ms as u64));
                 }
                 SensorCmd::SubscribeTo {
                     sensor: Sensor::Cliff,
