@@ -7,6 +7,15 @@
 pub mod movements;
 pub mod sensors;
 
+/// Commands sent from Main system (Rpi5) to Engine (STM32 MCU).
+#[derive(defmt::Format)]
+pub enum EngineCommand {
+    Move(movements::MoveCmd),
+    Sensor(sensors::SensorCmd),
+}
+
+pub enum Error {}
+
 #[derive(defmt::Format)]
 pub enum Sensor {
     /// Mesures distance, detects obstacle.

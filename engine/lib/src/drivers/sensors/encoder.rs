@@ -19,10 +19,6 @@ pub struct Encoder {
     left: Qei<'static, TIM1>,
     /// Right side encoder.
     right: Qei<'static, TIM2>,
-    /// Cached left encoder last count.
-    left_count: u32,
-    /// Cached right encoder last count.
-    right_count: u32,
     config: WheelEncoderConfig,
 }
 
@@ -35,8 +31,6 @@ impl Encoder {
         Encoder {
             left,
             right,
-            left_count: 0,
-            right_count: 0,
             config,
         }
     }

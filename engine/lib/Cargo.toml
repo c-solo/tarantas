@@ -1,6 +1,6 @@
 [package]
 name = "engine"
-description = "Engine node - firmware for the robot MCU controlling motors and sensors"
+description = "Engine node - library for the robot MCU controlling motors and sensors"
 version = "0.1.0"
 edition = "2021"
 

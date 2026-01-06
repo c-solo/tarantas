@@ -1,5 +1,5 @@
 [package]
-name = "robot"
+name = "firmware"
 version = "0.1.0"
 edition = "2021"
 resolver = "2"
@@ -10,7 +10,7 @@ lto = true
 opt-level = 'z'
 
 [dependencies]
-engine = { path = "../engine" }
+engine = { path = "../lib" }
 
 embassy-stm32 = { workspace = true }
 embassy-executor = { workspace = true }

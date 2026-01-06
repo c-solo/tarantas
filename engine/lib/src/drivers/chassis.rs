@@ -73,7 +73,7 @@ impl SkidSteer {
         let max = self.left.max_duty_cycle() as f32;
 
         fn go(pwm: &mut SimplePwm<'static, impl GeneralInstance4Channel>, speed: f32, max: f32) {
-            let duty = (speed.clamp(-1.0, 1.0).abs() * max) as u16;
+            let duty = (speed.clamp(-1.0, 1.0).abs() * max) as u32;
             if speed >= 0.0 {
                 pwm.ch1().set_duty_cycle(duty);
                 pwm.ch2().set_duty_cycle(0);
@@ -94,7 +94,7 @@ impl SkidSteer {
 }
 
 /// Main operation task for the chassis.
-/// Gets commands from [`C`]
+/// Gets commands from [`MOVE_CMD_SIGNAL`] channel.
 #[embassy_executor::task]
 pub async fn movement_handler(mut skid_steer: SkidSteer) {
     loop {

@@ -2,8 +2,8 @@
 #![no_main]
 
 use engine::{
-    core::error,
-    hardware::{led, sensors, sensors::distance::DistanceSensor},
+    drivers::{led, sensors, sensors::distance::DistanceSensor},
+    system::error,
 };
 
 use core::cell::RefCell;
@@ -16,14 +16,14 @@ use embassy_stm32::{
 };
 use embassy_time::{Duration, Timer};
 use embedded_hal_bus::i2c::RefCellDevice;
-use engine::hardware::chassis::SkidSteer;
+use engine::drivers::chassis::SkidSteer;
 
 use defmt as _;
 use defmt_rtt as _;
 use panic_probe as _;
 
-use embassy_stm32::timer::qei::{Qei, QeiPin};
-use engine::hardware::{
+use embassy_stm32::timer::qei::Qei;
+use engine::drivers::{
     chassis,
     sensors::{
         encoder,
@@ -53,8 +53,8 @@ async fn main(spawner: Spawner) {
         .expect("failed to spawn movement handler");
 
     // Initialize wheel encoder
-    let left = Qei::new(p.TIM1, QeiPin::new(p.PA8), QeiPin::new(p.PA9));
-    let right = Qei::new(p.TIM2, QeiPin::new(p.PA0), QeiPin::new(p.PA1));
+    let left = Qei::new(p.TIM1, p.PA8, p.PA9, Default::default());
+    let right = Qei::new(p.TIM2, p.PA0, p.PA1, Default::default());
     let config = WheelEncoderConfig {
         pulses_per_revolution: 1500.0,
         wheel_diameter_mm: 80.0,

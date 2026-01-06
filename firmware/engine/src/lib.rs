@@ -1,5 +1,0 @@
-#![no_std]
-
-pub mod core;
-pub mod hardware;
-mod protocol;

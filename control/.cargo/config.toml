@@ -1,0 +1,5 @@
+# If building directly on RPi, leave target unset to use host target.
+
+# If building on laptop for RPI5 uncomment the following:
+# [build]
+# target = "aarch64-unknown-linux-gnu"

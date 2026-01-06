@@ -11,10 +11,8 @@ use protocol::{
 };
 use static_cell::StaticCell;
 
-use crate::{
-    hardware::sensors::distance::DistanceSensor,
-    protocol::{bus::ERROR_CH, SystemError},
-};
+use crate::bus::{SystemError, ERROR_CH};
+use distance::DistanceSensor;
 
 pub mod cliff;
 pub mod distance;

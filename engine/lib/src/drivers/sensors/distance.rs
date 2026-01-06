@@ -10,7 +10,7 @@ use embassy_time::{block_for, Duration, Instant};
 use embedded_hal_bus::i2c::RefCellDevice;
 use vl53l0x::{Error, VL53L0x};
 
-use crate::hardware::sensors::SensorError;
+use crate::drivers::sensors::SensorError;
 
 pub type SharedI2c = RefCellDevice<'static, I2c<'static, Blocking, Master>>;
 

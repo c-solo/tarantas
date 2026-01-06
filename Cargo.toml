@@ -2,8 +2,9 @@
 resolver = "2"
 members = [
     "protocol",
-    "firmware/engine",
-    "firmware/robot"
+    "engine/lib",
+    "engine/firmware",
+    "control"
 ]
 
 [workspace.dependencies]
@@ -13,7 +14,7 @@ defmt-rtt = "1.1"
 static_cell = {  version = "2.1", features = ["nightly"] }
 
 # STM32 related crates
-embassy-stm32 = { version = "0.4", features = ["defmt", "stm32f401cc", "unstable-pac", "memory-x", "time-driver-tim5", "exti"] }
+embassy-stm32 = { version = "0.5", features = ["defmt", "stm32f401cc", "unstable-pac", "memory-x", "time-driver-tim5", "exti"] }
 embedded-hal-async = { version = "1.0" }
 embedded-hal-bus = { version = "0.3" }
 

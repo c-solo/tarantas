@@ -1,7 +1,7 @@
 use embassy_stm32::gpio::Output;
 use embassy_time::with_timeout;
 
-use crate::protocol::bus::LED_SIGNAL;
+use crate::bus::LED_SIGNAL;
 
 #[allow(dead_code)]
 pub struct Led {
