@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 /// Subscribe commands for various sensors.
 /// After subscription, sensors will start sending [`Data`] data at specified intervals.
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum SensorCmd {
     SubscribeTo {
@@ -12,14 +12,14 @@ pub enum SensorCmd {
 }
 
 /// Telemetry data from various sensors.
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum Data {
     DistanceFront { mm: u16 },
     DistanceBack { mm: u16 },
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum Sensor {
     /// Mesures distance, detects obstacle.

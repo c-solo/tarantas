@@ -19,19 +19,19 @@ pub struct Encoder {
     left: Qei<'static, TIM1>,
     /// Right side encoder.
     right: Qei<'static, TIM2>,
-    config: WheelEncoderConfig,
+    _config: WheelEncoderConfig,
 }
 
 impl Encoder {
     pub fn new(
         left: Qei<'static, TIM1>,
         right: Qei<'static, TIM2>,
-        config: WheelEncoderConfig,
+        _config: WheelEncoderConfig,
     ) -> Self {
         Encoder {
             left,
             right,
-            config,
+            _config,
         }
     }
 

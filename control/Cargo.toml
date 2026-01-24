@@ -4,6 +4,9 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-protocol = { path = "../protocol" }
+protocol = { path = "../protocol", features = ["codec"] }
+eyre = "0.6"
+tokio-serial = { version = "5.4", features = ["codec"] }
+futures = "0.3"
 
 [dev-dependencies]

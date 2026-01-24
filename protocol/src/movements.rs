@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 /// Command to control the movement of the robot.
 /// Note that new commands override previous ones instantly.
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub struct MoveCmd {
     /// Left side speed: -1.0 to 1.0 (Forward/Backward)

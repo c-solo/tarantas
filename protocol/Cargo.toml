@@ -9,7 +9,10 @@ path = "src/lib.rs"
 [dependencies]
 serde = { version = "1.0", default-features = false, features = ["derive"] }
 defmt = {  version = "1" , optional = true }
+tokio-util = { version = "0.7", features = ["codec"], optional = true }
+postcard = { version = "1.0", default-features = false, optional = true }
 
 [features]
 default = []
 defmt = ["dep:defmt"]
+codec = ["tokio-util", "postcard"]
