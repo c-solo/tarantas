@@ -22,7 +22,7 @@ pub enum Data {
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum Sensor {
-    /// Mesures distance, detects obstacle.
+    /// Measures distance, detects obstacle.
     Distance,
     /// Detects no ground under the robot (cliffs, stairs).
     Cliff,

@@ -58,12 +58,17 @@ pub async fn sensor_polling(mut front_dist: DistanceSensor, mut back_dist: Dista
             back_dist.update_next_poll_at(now);
         };
 
-        // select the nearest next poll time for awaiting
-        let next_poll_at = front_dist.next_poll_at().min(back_dist.next_poll_at());
-        let sleep_duration = next_poll_at.duration_since(now);
-
         // sleep until next poll or command received
-        if let Ok(cmd) = with_timeout(sleep_duration, SENSOR_CMD_CH.receive()).await {
+        let next_poll_at = front_dist.next_poll_at().min(back_dist.next_poll_at());
+        let cmd = if next_poll_at == Instant::MAX {
+            // no active subscriptions — block until first command
+            Ok(SENSOR_CMD_CH.receive().await)
+        } else {
+            let sleep_duration = next_poll_at.duration_since(now);
+            with_timeout(sleep_duration, SENSOR_CMD_CH.receive()).await
+        };
+
+        if let Ok(cmd) = cmd {
             match cmd {
                 SensorCmd::SubscribeTo {
                     sensor: Sensor::Distance,

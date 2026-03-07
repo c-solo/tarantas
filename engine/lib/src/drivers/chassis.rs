@@ -70,9 +70,8 @@ impl SkidSteer {
     /// - `left_speed` - Speed for left motors (-1.0..+1.0).
     /// - `right_speed` - Speed for right motors (-1.0..+1.0).
     pub fn set_speed(&mut self, left_speed: f32, right_speed: f32) {
-        let max = self.left.max_duty_cycle() as f32;
-
-        fn go(pwm: &mut SimplePwm<'static, impl GeneralInstance4Channel>, speed: f32, max: f32) {
+        fn go(pwm: &mut SimplePwm<'static, impl GeneralInstance4Channel>, speed: f32) {
+            let max = pwm.max_duty_cycle() as f32;
             let duty = (speed.clamp(-1.0, 1.0).abs() * max) as u32;
             if speed >= 0.0 {
                 pwm.ch1().set_duty_cycle(duty);
@@ -83,8 +82,8 @@ impl SkidSteer {
             }
         }
 
-        go(&mut self.left, left_speed, max);
-        go(&mut self.right, right_speed, max);
+        go(&mut self.left, left_speed);
+        go(&mut self.right, right_speed);
     }
 
     /// Stops the chassis (sets speed to 0).

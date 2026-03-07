@@ -1,4 +1,4 @@
-# Potruler Robot
+# Tarantas Robot
 
 Rust-based robot control system.
 
