@@ -1,4 +1,4 @@
-//! Communication between Core (STM32 MCU) and Main system (Rpi5).
+//! Communication between Core (STM32 MCU) and Main system (Jetson Orin Nano).
 
 #![cfg_attr(not(feature = "codec"), no_std)]
 
@@ -11,7 +11,7 @@ pub mod system;
 #[cfg(feature = "codec")]
 pub mod codec;
 
-/// Commands sent from Main system (Rpi5) to Engine (STM32 MCU).
+/// Commands sent from Main system (Jetson Orin Nano) to Engine (STM32 MCU).
 /// There is no direct response to commands (fire and forget), instead Engine sends [`Report`]
 /// messages back instantly or periodically.
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]

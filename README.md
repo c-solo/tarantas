@@ -4,14 +4,14 @@ Rust-based robot control system.
 
 - **`engine/lib`** - STM32 firmware core library (drivers, system, bus)
 - **`engine/firmware`** - STM32 application entry point
-- **`control`** - Raspberry Pi control software
+- **`control`** - Jetson Orin Nano control software
 - **`protocol`** - Communication protocol between `control` and `engine`
 
 ## Build
 
 Each package has its own target configuration in `.cargo/config.toml`:
 - `engine/lib` and `engine/firmware` → `thumbv7em-none-eabihf` (STM32)
-- `control` → host target (Raspberry Pi) or can be overridden
+- `control` → host target (Jetson Orin Nano) or can be overridden
 
 **STM32 firmware:**
 ```bash
@@ -23,7 +23,7 @@ cargo build --release
 cargo build -p firmware --release
 ```
 
-**Raspberry Pi control:**
+**Jetson Orin Nano control:**
 ```bash
 # From package directory (uses host target):
 cd control

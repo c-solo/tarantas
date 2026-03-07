@@ -3,7 +3,7 @@ runner = "probe-rs run --chip STM32F401CCUx"
 
 # No global build target - each package specifies its own
 # See engine/lib/.cargo/config.toml for STM32 target
-# See control/.cargo/config.toml for RPi target
+# See control/.cargo/config.toml for Jetson target
 
 [target.'cfg(all(target_arch = "arm", target_os = "none"))']
 rustflags = [
@@ -19,5 +19,5 @@ flash = "run --target thumbv7em-none-eabihf -p firmware"
 
 # Check engine with STM32 target
 check_e = "check --target thumbv7em-none-eabihf -p engine"
-# Check control with RPi target
+# Check control with Jetson target
 check_c = "check -p control"

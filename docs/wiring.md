@@ -15,14 +15,16 @@
 
 ## Pinout Map
 
-### 1. Main Computer Communication (Raspberry Pi 5)
-*Protocol: UART (Serial). Baud-rate: 115200+.*
+### 1. Main Computer Communication (Jetson Orin Nano)
+*Protocol: UART (Serial). Baud-rate: 115200+. Device on Jetson: `/dev/ttyTHS1`.*
 
-| STM32 Pin | Function    | Connection (RPi 5)         | Notes                        |
-|:----------|:------------|:---------------------------|:-----------------------------|
-| **PA2**   | USART2_TX   | **GPIO 15 (RXD)** (Pin 10) | Data FROM Robot TO Pi        |
-| **PA3**   | USART2_RX   | **GPIO 14 (TXD)** (Pin 8)  | Data FROM Pi TO Robot        |
-| **GND**   | Ground      | **GND** (Pin 6/9/14)       | **MUST** share common ground |
+| STM32 Pin | Function  | Connection (Jetson Orin Nano) | Notes                        |
+|:----------|:----------|:------------------------------|:-----------------------------|
+| **PA2**   | USART2_TX | **UART1 RXD** (Pin 10)        | Data FROM Robot TO Jetson    |
+| **PA3**   | USART2_RX | **UART1 TXD** (Pin 8)         | Data FROM Jetson TO Robot    |
+| **GND**   | Ground    | **GND** (Pin 6/9/14)          | **MUST** share common ground |
+
+*> Note: Jetson Orin Nano uses 3.3V logic on UART — same as STM32, no level shifter needed.*
 
 ### 2. Motors (Power Stage)
 *Drivers: 2x BTS7960. Timers used in PWM Generation mode.*
@@ -37,7 +39,7 @@
 | **3.3V**  | Power         | -             | **VCC** (Driver logic)                   |
 | **GND**   | Ground        | -             | **GND** (Driver logic)                   |
 
-*> Note: Connect driver power terminals (B+/B-) to the 11.1V Battery. Connect M+/M- terminals to Motors.*
+*> Note: Connect driver power terminals (B+/B-) to the Motor Battery (4S LiPo, 14.8V). Connect M+/M- terminals to Motors.*
 
 ### 3. Encoders (Feedback)
 *Wheel speed reading. Hardware timers used in QEI mode. Reading FRONT wheels only.*
@@ -51,7 +53,7 @@
 | **3.3V**  | Power    | -             | Encoder **VCC** (Blue wire)        |
 | **GND**   | Ground   | -             | Encoder **GND** (Black/Green wire) |
 
-*> Warning: PA0 is the on-board KEY button. It will cease functioning as a button. Ensure encoders are powered by 3.3V 
+*> Warning: PA0 is the on-board KEY button. It will cease functioning as a button. Ensure encoders are powered by 3.3V
 to avoid damaging the PA0 pin (it is not 5V-tolerant).*
 
 ### 4. Sensors (Navigation & Obstacle Avoidance)
@@ -77,7 +79,24 @@ at startup to assign unique addresses (e.g., `0x30`, `0x31`...).
 | **PB12**  | GPIO_OUT | VL6180X (Front Cliff)    | **XSHUT / GPIO0** |
 | **PB13**  | GPIO_OUT | VL6180X (Back Cliff)     | **XSHUT / GPIO0** |
 
-### 5. Miscellaneous (Debug & Status)
+### 5. Power
+
+*Dual-battery setup: separate power for motors and electronics to isolate motor noise from Jetson/sensors.*
+
+| Supply              | Battery                  | Voltage Range    | Feeds                              |
+|:--------------------|:-------------------------|:-----------------|:-----------------------------------|
+| **Motor Battery**   | 4S LiPo 5200mAh 30C+    | 12.0–16.8V       | BTS7960 drivers (B+/B-)           |
+| **Logic Battery**   | 4S LiPo 2200–3000mAh    | 12.0–16.8V       | Jetson DC barrel jack (7-20V), STM32 (via onboard 3.3V reg) |
+
+**Common Ground:** Both battery GND **must** be connected to establish a shared voltage reference for UART.
+Use a short, thick wire (14–16 AWG). If motor PWM noise causes UART glitches, add a ferrite toroid
+on the GND bridge wire (3–5 turns through the core) to filter high-frequency interference while
+preserving the DC ground reference.
+
+**Charging:** Use a parallel charging board (both batteries must be identical 4S) to charge
+from a single charger, or a dual-channel charger (e.g. ISDT D2) for independent balancing.
+
+### 6. Miscellaneous (Debug & Status)
 
 | STM32 Pin      | Purpose                                                              |
 |:---------------|:---------------------------------------------------------------------|
