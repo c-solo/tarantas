@@ -18,7 +18,7 @@ pub mod codec;
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum Command {
     Move(movements::MoveCmd),
-    Sensor(sensors::SensorCmd),
+    Sensor(sensors::I2cSensorCmd),
     System(system::SystemCmd),
 }
 
@@ -47,5 +47,5 @@ pub enum EngineEvent {
     Ready,
     EmergencyStop,
     LowBattery,
-    Unavailable(sensors::Sensor),
+    Unavailable(sensors::I2cSensor),
 }

@@ -133,7 +133,7 @@ mod error {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{EngineEvent, movements::MoveCmd, system::SystemCmd};
+    use crate::{EngineEvent, movements::MoveCmd, sensors::Data, system::SystemCmd};
 
     #[test]
     fn test_codec_roundtrip() {
@@ -194,6 +194,12 @@ mod tests {
             Report::Pong(1),
             Report::Event(EngineEvent::Ready),
             Report::Event(EngineEvent::EmergencyStop),
+            Report::Telemetry(Data::Encoder {
+                left_mm: 150.5,
+                right_mm: 148.2,
+                left_speed: 120.0,
+                right_speed: 118.5,
+            }),
         ];
 
         for report in &reports {

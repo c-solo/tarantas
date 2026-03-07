@@ -5,7 +5,7 @@ use embassy_stm32::{
     mode::Blocking,
 };
 use embassy_time::{with_timeout, Duration, Instant};
-use protocol::sensors::{Data, SensorCmd};
+use protocol::sensors::{Data, I2cSensorCmd};
 use static_cell::StaticCell;
 
 use crate::bus::{
@@ -13,7 +13,7 @@ use crate::bus::{
     SystemError, ERROR_CH,
 };
 use distance::DistanceSensor;
-use protocol::sensors::Sensor;
+use protocol::sensors::I2cSensor;
 
 pub mod cliff;
 pub mod distance;
@@ -36,9 +36,9 @@ pub async fn sensor_polling(mut front_dist: DistanceSensor, mut back_dist: Dista
             match front_dist.read_distance_mm() {
                 Ok(mm) => TELEMETRY_CH.send(Data::DistanceFront { mm }).await,
                 Err(err) => {
-                    warn!("Front distance sensor error: {:?}", err);
+                    warn!("front distance sensor error: {:?}", err);
                     ERROR_CH
-                        .send(SystemError::SensorError(Sensor::Distance))
+                        .send(SystemError::SensorError(I2cSensor::Distance))
                         .await
                 }
             }
@@ -49,9 +49,9 @@ pub async fn sensor_polling(mut front_dist: DistanceSensor, mut back_dist: Dista
             match back_dist.read_distance_mm() {
                 Ok(mm) => TELEMETRY_CH.send(Data::DistanceBack { mm }).await,
                 Err(e) => {
-                    warn!("Back distance sensor error: {:?}", e);
+                    warn!("back distance sensor error: {:?}", e);
                     ERROR_CH
-                        .send(SystemError::SensorError(Sensor::Distance))
+                        .send(SystemError::SensorError(I2cSensor::Distance))
                         .await;
                 }
             }
@@ -70,21 +70,21 @@ pub async fn sensor_polling(mut front_dist: DistanceSensor, mut back_dist: Dista
 
         if let Ok(cmd) = cmd {
             match cmd {
-                SensorCmd::SubscribeTo {
-                    sensor: Sensor::Distance,
+                I2cSensorCmd::SubscribeTo {
+                    sensor: I2cSensor::Distance,
                     poll_interval_ms,
                 } => {
                     front_dist.set_poll_interval(Duration::from_millis(poll_interval_ms as u64));
                     back_dist.set_poll_interval(Duration::from_millis(poll_interval_ms as u64));
                 }
-                SensorCmd::SubscribeTo {
-                    sensor: Sensor::Cliff,
+                I2cSensorCmd::SubscribeTo {
+                    sensor: I2cSensor::Cliff,
                     ..
                 } => {
                     todo!("cliff sensor subscription not implemented yet");
                 }
-                SensorCmd::SubscribeTo {
-                    sensor: Sensor::Imu,
+                I2cSensorCmd::SubscribeTo {
+                    sensor: I2cSensor::Imu,
                     ..
                 } => {
                     todo!("imu sensor subscription not implemented yet");

@@ -5,7 +5,7 @@ use crate::{
     system::reflex::emergency_stop,
 };
 use defmt::error;
-use protocol::sensors::Sensor;
+use protocol::sensors::I2cSensor;
 
 /// Handles all inner system errors.
 /// Some errors trigger an emergency stop, while others are logged and sent via network to main system.
@@ -13,11 +13,11 @@ use protocol::sensors::Sensor;
 pub async fn error_handler() {
     loop {
         match ERROR_CH.receive().await {
-            err @ SystemError::SensorError(Sensor::Cliff) => {
+            err @ SystemError::SensorError(I2cSensor::Cliff) => {
                 emergency_stop(err);
             }
-            err @ SystemError::SensorError(Sensor::Distance)
-            | err @ SystemError::SensorError(Sensor::Imu) => {
+            err @ SystemError::SensorError(I2cSensor::Distance)
+            | err @ SystemError::SensorError(I2cSensor::Imu) => {
                 // no need to stop the system for distance or Imu errors
                 error!("{}", err);
                 // TODO: send notification to main system status

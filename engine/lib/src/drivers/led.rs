@@ -12,7 +12,7 @@ pub struct Led {
 impl Led {
     /// Creates new LED driver.
     pub fn new(name: &'static str, pin: Output<'static>) -> Self {
-        defmt::info!("Led '{}' initialized", name);
+        defmt::info!("led '{}' initialized", name);
         Self { name, pin }
     }
 

@@ -1,7 +1,7 @@
 //! Inner bus modules for the STM32 firmware.
 
 use defmt::Format;
-use protocol::sensors::Sensor;
+use protocol::sensors::I2cSensor;
 
 pub mod bus;
 
@@ -10,5 +10,5 @@ pub use bus::{ERROR_CH, LED_SIGNAL};
 #[derive(Format)]
 pub enum SystemError {
     /// I2C bus error, or sensor not responding
-    SensorError(Sensor),
+    SensorError(I2cSensor),
 }

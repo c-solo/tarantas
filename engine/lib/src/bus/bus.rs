@@ -5,7 +5,7 @@ use embassy_sync::{
 };
 use protocol::{
     movements::MoveCmd,
-    sensors::{Data, SensorCmd},
+    sensors::{Data, I2cSensorCmd},
 };
 
 /// Led control bus.
@@ -18,7 +18,7 @@ pub static MOVE_CMD_SIGNAL: Signal<CriticalSectionRawMutex, MoveCmd> = Signal::n
 pub static ERROR_CH: Channel<CriticalSectionRawMutex, SystemError, 10> = Channel::new();
 
 /// Request sensors channel.
-pub static SENSOR_CMD_CH: Channel<CriticalSectionRawMutex, SensorCmd, 10> = Channel::new();
+pub static SENSOR_CMD_CH: Channel<CriticalSectionRawMutex, I2cSensorCmd, 10> = Channel::new();
 
 /// Response sensors channel with telemetry data.
 pub static TELEMETRY_CH: Channel<CriticalSectionRawMutex, Data, 10> = Channel::new();
