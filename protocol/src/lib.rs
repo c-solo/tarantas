@@ -1,6 +1,6 @@
 //! Communication between Core (STM32 MCU) and Main system (Jetson Orin Nano).
 
-#![cfg_attr(not(feature = "codec"), no_std)]
+#![cfg_attr(not(feature = "tokio"), no_std)]
 
 use serde::{Deserialize, Serialize};
 
@@ -8,8 +8,10 @@ pub mod movements;
 pub mod sensors;
 pub mod system;
 
-#[cfg(feature = "codec")]
 pub mod codec;
+
+/// Maximum serialized message size shared by all codecs.
+pub const MAX_MESSAGE_SIZE: usize = 256;
 
 /// Commands sent from Main system (Jetson Orin Nano) to Engine (STM32 MCU).
 /// There is no direct response to commands (fire and forget), instead Engine sends [`Report`]

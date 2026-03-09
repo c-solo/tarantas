@@ -17,6 +17,8 @@ pub enum I2cSensorCmd {
 pub enum Data {
     DistanceFront { mm: u16 },
     DistanceBack { mm: u16 },
+    /// Wheel encoder odometry. Sent continuously without subscription,
+    /// at a fixed interval configured in engine settings (default 100ms).
     Encoder {
         /// Distance traveled by left wheels, mm.
         left_mm: f32,

@@ -5,7 +5,7 @@ use protocol::sensors::I2cSensor;
 
 pub mod bus;
 
-pub use bus::{ERROR_CH, LED_SIGNAL};
+pub use bus::{ERROR_CH, LED_SIGNAL, MOVE_CMD_SIGNAL, SENSOR_CMD_CH, TELEMETRY_CH};
 
 #[derive(Format)]
 pub enum SystemError {
