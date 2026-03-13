@@ -14,6 +14,7 @@ embassy-stm32.workspace = true
 embassy-time.workspace = true
 embassy-executor.workspace = true
 embassy-sync.workspace = true
+embassy-futures.workspace = true
 
 embedded-hal-bus.workspace = true
 

@@ -1,11 +1,14 @@
 //! Inner bus modules for the STM32 firmware.
+//!
+//! Channels are split by data flow direction:
+//! - [`bus::inbound`] — Control (Jetson) → Engine (STM32)
+//! - [`bus::outbound`] — Engine (STM32) → Control (Jetson)
+//! - [`bus::internal`] — Engine (STM32) → Engine task
 
 use defmt::Format;
 use protocol::sensors::I2cSensor;
 
 pub mod bus;
-
-pub use bus::{ERROR_CH, LED_SIGNAL, MOVE_CMD_SIGNAL, SENSOR_CMD_CH, TELEMETRY_CH};
 
 #[derive(Format)]
 pub enum SystemError {

@@ -1,6 +1,6 @@
 //! Driver for chassis hardware components.
 
-use crate::bus::bus::MOVE_CMD_SIGNAL;
+use crate::bus::bus::inbound;
 use embassy_stm32::{
     gpio::OutputType,
     peripherals,
@@ -93,11 +93,11 @@ impl SkidSteer {
 }
 
 /// Main operation task for the chassis.
-/// Gets commands from [`MOVE_CMD_SIGNAL`] channel.
+/// Gets commands from [`inbound::MOVE_CMD`] channel.
 #[embassy_executor::task]
 pub async fn movement_handler(mut skid_steer: SkidSteer) {
     loop {
-        let cmd = MOVE_CMD_SIGNAL.wait().await;
+        let cmd = inbound::MOVE_CMD.wait().await;
         skid_steer.set_speed(cmd.left, cmd.right);
     }
 }

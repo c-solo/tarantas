@@ -20,4 +20,5 @@ embedded-hal-bus = { version = "0.3" }
 # Async with embassy
 embassy-time = { version = "0.5", features = ["defmt", "defmt-timestamp-uptime", "tick-hz-1_000_000"] }
 embassy-sync = { version = "0.7" }
+embassy-futures = { version = "0.1" }
 embassy-executor = { version = "0.9", features = ["arch-cortex-m", "executor-thread"] }

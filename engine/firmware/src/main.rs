@@ -3,15 +3,18 @@
 
 use engine::{
     drivers::{led, sensors, sensors::distance::DistanceSensor},
-    system::error,
+    system::{error, network},
 };
 
 use core::cell::RefCell;
 use embassy_executor::Spawner;
 use embassy_stm32::{
+    bind_interrupts,
     gpio::{Level, Output, Speed},
     i2c::{self},
+    peripherals,
     time::Hertz,
+    usart,
     Config,
 };
 use embassy_time::{Duration, Timer};
@@ -21,6 +24,10 @@ use engine::drivers::chassis::SkidSteer;
 use defmt as _;
 use defmt_rtt as _;
 use panic_probe as _;
+
+bind_interrupts!(struct Irqs {
+    USART2 => usart::InterruptHandler<peripherals::USART2>;
+});
 
 use embassy_stm32::timer::qei::Qei;
 use engine::drivers::{
@@ -43,14 +50,25 @@ async fn main(spawner: Spawner) {
     let led_pin = Output::new(p.PC13, Level::Low, Speed::Low);
     let led = led::Led::new("status_led", led_pin);
 
-    spawner.spawn(led::led_handler(led)).unwrap();
-    spawner.spawn(error::error_handler()).unwrap();
+    spawner.spawn(led::led_handler(led)).expect("spawn led");
+    spawner.spawn(error::error_handler()).expect("spawn error");
+
+    // Initialize UART (serial link to Jetson)
+    let mut usart_config = usart::Config::default();
+    usart_config.baudrate = 115200;
+    let uart = usart::Uart::new(
+        p.USART2, p.PA3, p.PA2, Irqs, p.DMA1_CH6, p.DMA1_CH5, usart_config,
+    )
+    .expect("USART2 init failed");
+    let (tx, rx) = uart.split();
+    spawner.spawn(network::network_rx(rx)).expect("spawn network_rx");
+    spawner.spawn(network::network_tx(tx)).expect("spawn network_tx");
 
     // Initialize motors
     let skid_steer = SkidSteer::new(p.TIM3, p.PA6, p.PA7, p.TIM4, p.PB6, p.PB7, Hertz::khz(20));
     spawner
         .spawn(chassis::movement_handler(skid_steer))
-        .expect("failed to spawn movement handler");
+        .expect("spawn movement");
 
     // Initialize wheel encoder
     let left = Qei::new(p.TIM1, p.PA8, p.PA9, Default::default());
@@ -62,7 +80,7 @@ async fn main(spawner: Spawner) {
     let wheel_encoders = Encoder::new(left, right, config);
     spawner
         .spawn(encoder::encoder_handler(wheel_encoders))
-        .unwrap();
+        .expect("spawn encoder");
 
     // Initialize I2C sensors
     let mut i2c_cfg = i2c::Config::default();
@@ -87,5 +105,5 @@ async fn main(spawner: Spawner) {
 
     spawner
         .spawn(sensors::sensor_polling(front_dist_sensor, back_dist_sensor))
-        .expect("failed to spawn sensor polling task");
+        .expect("spawn sensors");
 }

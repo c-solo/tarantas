@@ -9,8 +9,8 @@ use protocol::sensors::{Data, I2cSensorCmd};
 use static_cell::StaticCell;
 
 use crate::bus::{
-    bus::{SENSOR_CMD_CH, TELEMETRY_CH},
-    SystemError, ERROR_CH,
+    bus::{inbound, internal, outbound},
+    SystemError,
 };
 use distance::DistanceSensor;
 use protocol::sensors::I2cSensor;
@@ -26,7 +26,7 @@ pub static SHARED_I2C: StaticCell<RefCell<I2c<'static, Blocking, Master>>> = Sta
 pub struct SensorError(&'static str);
 
 /// Polls all i2c sensors in one task.
-/// Handles sensor subscription commands from [`SENSOR_CMD_CH`] and sends telemetry data to [`TELEMETRY_CH`]
+/// Handles sensor subscription commands from [`inbound::SENSOR_CMD`] and sends telemetry to [`outbound::TELEMETRY`]
 #[embassy_executor::task]
 pub async fn sensor_polling(mut front_dist: DistanceSensor, mut back_dist: DistanceSensor) {
     loop {
@@ -34,10 +34,10 @@ pub async fn sensor_polling(mut front_dist: DistanceSensor, mut back_dist: Dista
 
         if front_dist.ready(now) {
             match front_dist.read_distance_mm() {
-                Ok(mm) => TELEMETRY_CH.send(Data::DistanceFront { mm }).await,
+                Ok(mm) => outbound::TELEMETRY.send(Data::DistanceFront { mm }).await,
                 Err(err) => {
                     warn!("front distance sensor error: {:?}", err);
-                    ERROR_CH
+                    internal::ERROR
                         .send(SystemError::SensorError(I2cSensor::Distance))
                         .await
                 }
@@ -47,10 +47,10 @@ pub async fn sensor_polling(mut front_dist: DistanceSensor, mut back_dist: Dista
 
         if back_dist.ready(now) {
             match back_dist.read_distance_mm() {
-                Ok(mm) => TELEMETRY_CH.send(Data::DistanceBack { mm }).await,
+                Ok(mm) => outbound::TELEMETRY.send(Data::DistanceBack { mm }).await,
                 Err(e) => {
                     warn!("back distance sensor error: {:?}", e);
-                    ERROR_CH
+                    internal::ERROR
                         .send(SystemError::SensorError(I2cSensor::Distance))
                         .await;
                 }
@@ -62,10 +62,10 @@ pub async fn sensor_polling(mut front_dist: DistanceSensor, mut back_dist: Dista
         let next_poll_at = front_dist.next_poll_at().min(back_dist.next_poll_at());
         let cmd = if next_poll_at == Instant::MAX {
             // no active subscriptions — block until first command
-            Ok(SENSOR_CMD_CH.receive().await)
+            Ok(inbound::SENSOR_CMD.receive().await)
         } else {
             let sleep_duration = next_poll_at.duration_since(now);
-            with_timeout(sleep_duration, SENSOR_CMD_CH.receive()).await
+            with_timeout(sleep_duration, inbound::SENSOR_CMD.receive()).await
         };
 
         if let Ok(cmd) = cmd {

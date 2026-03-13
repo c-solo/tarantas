@@ -2,7 +2,7 @@
 //! Planning and higher level control should be handled by Jetson via UDP.
 
 use crate::{
-    bus::{bus::MOVE_CMD_SIGNAL, SystemError, LED_SIGNAL},
+    bus::{bus::inbound, SystemError},
     drivers::led::LedCmd,
 };
 use defmt::error;
@@ -11,7 +11,7 @@ use protocol::movements::MoveCmd;
 /// Trigger an emergency stop due to the given cause.
 pub fn emergency_stop(cause: SystemError) {
     error!("emergency stop triggered ({})!", cause);
-    MOVE_CMD_SIGNAL.signal(MoveCmd::stop());
-    LED_SIGNAL.signal(LedCmd::Blink(10));
+    inbound::MOVE_CMD.signal(MoveCmd::stop());
+    inbound::LED.signal(LedCmd::Blink(10));
     // TODO: send emergency stop command to motor controller and report to Jetson
 }
