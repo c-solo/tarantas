@@ -1,5 +1,5 @@
 [target.thumbv7em-none-eabihf]
-runner = "probe-rs run --chip STM32F401CCUx"
+runner = "probe-rs run --chip STM32G431CBUx"
 
 # No global build target - each package specifies its own
 # See engine/lib/.cargo/config.toml for STM32 target

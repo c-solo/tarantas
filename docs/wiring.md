@@ -1,6 +1,6 @@
 # Chassis Control System Wiring Schema
 
-**Board:** STM32F401CCU6 "Black Pill"
+**Board:** STM32G431CBU6 "WeAct Black Pill"
 **Development Language:** Rust (`embassy-stm32`)
 **Architecture:** Differential Drive (Skid-Steer), 2 encoder channels.
 
@@ -8,8 +8,7 @@
 
 ### Global Rust Configuration
 
-- tim2: timer 2 is used for as embassy time driver (add time-driver-tim2 for embassy-stm32)
-- tim5: timer 5 for wheel encoders
+- tim8: timer 8 is used as embassy time driver (add time-driver-tim8 for embassy-stm32)
 
 ---
 

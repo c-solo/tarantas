@@ -40,7 +40,7 @@ use engine::drivers::{
 #[embassy_executor::main]
 async fn main(spawner: Spawner) {
     let p = embassy_stm32::init(Config::default());
-    // System clock switched to sTIM5
+    // System time driver on TIM8
 
     // Small delay to allow RTT connection to establish
     Timer::after(Duration::from_millis(10)).await;
