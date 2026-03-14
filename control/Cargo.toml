@@ -6,7 +6,10 @@ edition = "2024"
 [dependencies]
 protocol = { path = "../protocol", features = ["tokio"] }
 eyre = "0.6"
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "signal", "time"] }
 tokio-serial = { version = "5.4", features = ["codec"] }
+tracing = "0.1"
+tracing-subscriber = "0.3"
 futures = "0.3"
 
 [dev-dependencies]

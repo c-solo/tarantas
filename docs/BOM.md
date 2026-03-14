@@ -3,7 +3,7 @@
 ## Compute & Communication
 
 - [x] Jetson Orin Nano (8GB) + active cooling (fan included with carrier board).
-- [x] STM32F401CCU6 "Black Pill" — MCU for motor and sensor control.
+- [x] STM32G431CBU6 "WeAct Black Pill" — MCU for motor and sensor control (170 MHz, FDCAN, CORDIC).
 - [x] NVMe SSD: M.2 2230/2242 for Jetson (no microSD needed — boots from NVMe).
 
 ## Drivetrain
@@ -17,7 +17,7 @@
 
 - [ ] IMU: 1x Adafruit BNO085 (or SparkFun VR IMU). Don't cheap out here.
 - [ ] Distance: 2-3x VL53L0X (ToF Distance Sensor).
-- [ ] Camera: CSI camera (IMX219/IMX477) or USB webcam. Jetson supports MIPI CSI-2 with hardware ISP.
+- [x] Camera: OAK-D Lite (stereo depth + VPU, USB to Jetson).
 
 ## Power (Dual Battery)
 
