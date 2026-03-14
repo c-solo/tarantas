@@ -1,6 +1,7 @@
 //! Driver for chassis hardware components.
 
 use crate::bus::bus::inbound;
+use embassy_futures::select::{Either, select};
 use embassy_stm32::{
     Peri,
     gpio::OutputType,
@@ -11,6 +12,7 @@ use embassy_stm32::{
         simple_pwm::{PwmPin, SimplePwm},
     },
 };
+use embassy_time::{Duration, Ticker};
 
 /// Skid-steer chassis with 4 wheels driven by two drivers (`BTS7960`).
 /// Each driver controls two motors on one side (left/right).
@@ -92,12 +94,55 @@ impl SkidSteer {
     }
 }
 
+const ACCEL_TICK_MS: u64 = 20;
+
+/// Moves `current` towards `target` by at most `max_step`.
+fn acceleration(current: f32, target: f32, max_step: f32) -> f32 {
+    let diff = target - current;
+    if diff.abs() <= max_step {
+        target
+    } else {
+        current + max_step.copysign(diff)
+    }
+}
+
 /// Main operation task for the chassis.
-/// Gets commands from [`inbound::MOVE_CMD`] channel.
+/// Gets commands from [`inbound::MOVE_CMD`] channel, accelerates smoothly.
 #[embassy_executor::task]
 pub async fn movement_handler(mut skid_steer: SkidSteer) {
+    let mut current_left: f32 = 0.0;
+    let mut current_right: f32 = 0.0;
+    let mut target_left: f32 = 0.0;
+    let mut target_right: f32 = 0.0;
+    let mut max_step: f32 = 0.0;
+
+    let mut ticker = Ticker::every(Duration::from_millis(ACCEL_TICK_MS));
+
     loop {
-        let cmd = inbound::MOVE_CMD.wait().await;
-        skid_steer.set_speed(cmd.left, cmd.right);
+        match select(inbound::MOVE_CMD.wait(), ticker.next()).await {
+            Either::First(cmd) => {
+                target_left = cmd.left;
+                target_right = cmd.right;
+                if cmd.accel_secs == 0.0 {
+                    // instant
+                    current_left = target_left;
+                    current_right = target_right;
+                    skid_steer.set_speed(current_left, current_right);
+                } else {
+                    // 1.0 / accel_secs = speed units per second
+                    // * tick_s = speed units per tick
+                    let tick_s = ACCEL_TICK_MS as f32 / 1000.0;
+                    max_step = tick_s / cmd.accel_secs;
+                }
+            }
+            Either::Second(_) => {
+                if current_left == target_left && current_right == target_right {
+                    continue;
+                }
+                current_left = acceleration(current_left, target_left, max_step);
+                current_right = acceleration(current_right, target_right, max_step);
+                skid_steer.set_speed(current_left, current_right);
+            }
+        }
     }
 }

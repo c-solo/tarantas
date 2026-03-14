@@ -153,7 +153,7 @@ mod tests {
         let cmds = vec![
             Command::System(SystemCmd::Ping(1)),
             Command::Move(MoveCmd::stop()),
-            Command::Move(MoveCmd::drive(0.5, 0.5)),
+            Command::Move(MoveCmd::drive(0.5, 0.5, 0.0)),
         ];
 
         for cmd in &cmds {
@@ -206,7 +206,7 @@ mod tests {
         let mut buf = BytesMut::new();
 
         // Control (tokio) sends Command
-        let cmd = Command::Move(MoveCmd::drive(0.5, -0.3));
+        let cmd = Command::Move(MoveCmd::drive(0.5, -0.3, 0.0));
         Encoder::<Command>::encode(&mut tokio_control, cmd.clone(), &mut buf).unwrap();
 
         // Engine (no_std) decodes

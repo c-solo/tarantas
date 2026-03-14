@@ -212,7 +212,7 @@ mod tests {
         let cmds = vec![
             Command::System(SystemCmd::Ping(1)),
             Command::Move(MoveCmd::stop()),
-            Command::Move(MoveCmd::drive(0.5, 0.5)),
+            Command::Move(MoveCmd::drive(0.5, 0.5, 0.0)),
         ];
 
         for cmd in &cmds {

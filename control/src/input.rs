@@ -5,7 +5,7 @@ use tokio::sync::mpsc;
 use tracing::info;
 
 const SPEED: f32 = 0.5;
-const RAMP: f32 = 2.0;
+const ACCEL_SECS: f32 = 0.5;
 
 pub async fn stdin_task(tx: mpsc::Sender<Command>) {
     info!("controls: W/S forward/back, A/D turn, Space stop, Q quit");
@@ -23,10 +23,10 @@ pub async fn stdin_task(tx: mpsc::Sender<Command>) {
         };
 
         let cmd = match code {
-            KeyCode::Char('w') => MoveCmd::drive(SPEED, SPEED, RAMP),
-            KeyCode::Char('s') => MoveCmd::drive(-SPEED, -SPEED, RAMP),
-            KeyCode::Char('a') => MoveCmd::drive(-SPEED, SPEED, RAMP),
-            KeyCode::Char('d') => MoveCmd::drive(SPEED, -SPEED, RAMP),
+            KeyCode::Char('w') => MoveCmd::drive(SPEED, SPEED, ACCEL_SECS),
+            KeyCode::Char('s') => MoveCmd::drive(-SPEED, -SPEED, ACCEL_SECS),
+            KeyCode::Char('a') => MoveCmd::drive(-SPEED, SPEED, ACCEL_SECS),
+            KeyCode::Char('d') => MoveCmd::drive(SPEED, -SPEED, ACCEL_SECS),
             KeyCode::Char(' ') => MoveCmd::stop(),
             KeyCode::Char('q') => {
                 info!("quit requested");
