@@ -10,6 +10,7 @@ tokio = { version = "1", features = ["rt-multi-thread", "macros", "signal", "tim
 tokio-serial = { version = "5.4", features = ["codec"] }
 tracing = "0.1"
 tracing-subscriber = "0.3"
+crossterm = { version = "0.28", features = ["event-stream"] }
 futures = "0.3"
 
 [dev-dependencies]
