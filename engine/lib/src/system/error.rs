@@ -1,7 +1,7 @@
 //! Error handling module for the firmware.
 
 use crate::{
-    bus::{bus::internal, SystemError},
+    bus::{SystemError, bus::internal},
     system::reflex::emergency_stop,
 };
 use defmt::error;

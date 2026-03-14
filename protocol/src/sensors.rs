@@ -15,8 +15,12 @@ pub enum I2cSensorCmd {
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum Data {
-    DistanceFront { mm: u16 },
-    DistanceBack { mm: u16 },
+    DistanceFront {
+        mm: u16,
+    },
+    DistanceBack {
+        mm: u16,
+    },
     /// Wheel encoder odometry. Sent continuously without subscription,
     /// at a fixed interval configured in engine settings (default 100ms).
     Encoder {

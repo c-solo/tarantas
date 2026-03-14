@@ -6,7 +6,7 @@ use embassy_stm32::{
     i2c::{I2c, Master},
     mode::Blocking,
 };
-use embassy_time::{block_for, Duration, Instant};
+use embassy_time::{Duration, Instant, block_for};
 use embedded_hal_bus::i2c::RefCellDevice;
 use vl53l0x::{Error, VL53L0x};
 

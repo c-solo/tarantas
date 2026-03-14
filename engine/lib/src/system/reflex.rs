@@ -2,7 +2,7 @@
 //! Planning and higher level control should be handled by Jetson via UDP.
 
 use crate::{
-    bus::{bus::inbound, SystemError},
+    bus::{SystemError, bus::inbound},
     drivers::led::LedCmd,
 };
 use defmt::error;

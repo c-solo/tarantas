@@ -92,7 +92,6 @@ pub enum DecodeResult<T> {
     Overflow,
 }
 
-
 /// Accumulator for COBS decoding. Maintains an internal buffer and state to decode incoming bytes
 /// until a complete frame is formed or an overflow occurs.
 struct CobsAccumulator {
@@ -165,8 +164,7 @@ fn encode_cobs<T: Serialize>(val: &T, buf: &mut [u8]) -> Result<usize, postcard:
 mod tests {
     extern crate std;
 
-    use std::vec;
-    use std::vec::Vec;
+    use std::{vec, vec::Vec};
 
     use super::*;
     use crate::{EngineEvent, movements::MoveCmd, sensors::Data, system::SystemCmd};

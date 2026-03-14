@@ -4,13 +4,13 @@ use embassy_stm32::{
     i2c::{I2c, Master},
     mode::Blocking,
 };
-use embassy_time::{with_timeout, Duration, Instant};
+use embassy_time::{Duration, Instant, with_timeout};
 use protocol::sensors::{Data, I2cSensorCmd};
 use static_cell::StaticCell;
 
 use crate::bus::{
-    bus::{inbound, internal, outbound},
     SystemError,
+    bus::{inbound, internal, outbound},
 };
 use distance::DistanceSensor;
 use protocol::sensors::I2cSensor;

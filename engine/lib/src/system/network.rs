@@ -6,7 +6,10 @@
 
 use defmt::{info, warn};
 use embassy_futures::select::{Either, select};
-use embassy_stm32::{mode::Async, usart::{UartRx, UartTx}};
+use embassy_stm32::{
+    mode::Async,
+    usart::{UartRx, UartTx},
+};
 use protocol::{
     Command, Report,
     codec::{DecodeResult, EngineCodec},

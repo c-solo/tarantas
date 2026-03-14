@@ -9,13 +9,12 @@ use engine::{
 use core::cell::RefCell;
 use embassy_executor::Spawner;
 use embassy_stm32::{
-    bind_interrupts,
+    Config, bind_interrupts,
     gpio::{Level, Output, Speed},
     i2c::{self},
     peripherals,
     time::Hertz,
     usart,
-    Config,
 };
 use embassy_time::{Duration, Timer};
 use embedded_hal_bus::i2c::RefCellDevice;
@@ -57,12 +56,22 @@ async fn main(spawner: Spawner) {
     let mut usart_config = usart::Config::default();
     usart_config.baudrate = 115200;
     let uart = usart::Uart::new(
-        p.USART2, p.PA3, p.PA2, Irqs, p.DMA1_CH6, p.DMA1_CH5, usart_config,
+        p.USART2,
+        p.PA3,
+        p.PA2,
+        Irqs,
+        p.DMA1_CH6,
+        p.DMA1_CH5,
+        usart_config,
     )
     .expect("USART2 init failed");
     let (tx, rx) = uart.split();
-    spawner.spawn(network::network_rx(rx)).expect("spawn network_rx");
-    spawner.spawn(network::network_tx(tx)).expect("spawn network_tx");
+    spawner
+        .spawn(network::network_rx(rx))
+        .expect("spawn network_rx");
+    spawner
+        .spawn(network::network_tx(tx))
+        .expect("spawn network_tx");
 
     // Initialize motors
     let skid_steer = SkidSteer::new(p.TIM3, p.PA6, p.PA7, p.TIM4, p.PB6, p.PB7, Hertz::khz(20));

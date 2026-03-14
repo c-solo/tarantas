@@ -2,14 +2,14 @@
 
 use crate::bus::bus::inbound;
 use embassy_stm32::{
+    Peri,
     gpio::OutputType,
     peripherals,
     time::Hertz,
     timer::{
-        simple_pwm::{PwmPin, SimplePwm},
         GeneralInstance4Channel,
+        simple_pwm::{PwmPin, SimplePwm},
     },
-    Peri,
 };
 
 /// Skid-steer chassis with 4 wheels driven by two drivers (`BTS7960`).

@@ -1,9 +1,9 @@
 use eyre::Result;
 use futures::{
-    stream::{SplitSink, SplitStream},
     StreamExt,
+    stream::{SplitSink, SplitStream},
 };
-use protocol::{codec::ControlCodec, Command};
+use protocol::{Command, codec::ControlCodec};
 use std::time::Duration;
 use tokio_serial::frame::SerialFramed;
 
