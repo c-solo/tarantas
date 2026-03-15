@@ -76,7 +76,6 @@ async fn run(conn: SerialConnection, cmd_rx: &mut mpsc::Receiver<Command>) -> Re
                 match cmd {
                     Some(cmd) => sink.send(cmd).await?,
                     None => {
-                        // stdin task exited (Q pressed)
                         info!("stopping motors");
                         let _ = sink.send(Command::Move(MoveCmd::stop())).await;
                         return Ok(Shutdown::Graceful);
