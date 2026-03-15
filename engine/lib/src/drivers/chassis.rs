@@ -12,7 +12,7 @@ use embassy_stm32::{
         simple_pwm::{PwmPin, SimplePwm},
     },
 };
-use embassy_time::{Duration, Ticker};
+use embassy_time::{Duration, Instant, Ticker};
 
 /// Skid-steer chassis with 4 wheels driven by two drivers (`BTS7960`).
 /// Each driver controls two motors on one side (left/right).
@@ -94,7 +94,8 @@ impl SkidSteer {
     }
 }
 
-const ACCEL_TICK_MS: u64 = 20;
+const TICK_MS: u64 = 20;
+const WATCHDOG_MS: u64 = 500;
 
 /// Moves `current` towards `target` by at most `max_step`.
 fn acceleration(current: f32, target: f32, max_step: f32) -> f32 {
@@ -115,27 +116,39 @@ pub async fn movement_handler(mut skid_steer: SkidSteer) {
     let mut target_left: f32 = 0.0;
     let mut target_right: f32 = 0.0;
     let mut max_step: f32 = 0.0;
+    let mut last_cmd_at = Instant::now();
 
-    let mut ticker = Ticker::every(Duration::from_millis(ACCEL_TICK_MS));
+    let mut ticker = Ticker::every(Duration::from_millis(TICK_MS));
 
     loop {
         match select(inbound::MOVE_CMD.wait(), ticker.next()).await {
             Either::First(cmd) => {
+                last_cmd_at = Instant::now();
                 target_left = cmd.left;
                 target_right = cmd.right;
                 if cmd.accel_secs == 0.0 {
-                    // instant
                     current_left = target_left;
                     current_right = target_right;
                     skid_steer.set_speed(current_left, current_right);
                 } else {
-                    // 1.0 / accel_secs = speed units per second
-                    // * tick_s = speed units per tick
-                    let tick_s = ACCEL_TICK_MS as f32 / 1000.0;
+                    let tick_s = TICK_MS as f32 / 1000.0;
                     max_step = tick_s / cmd.accel_secs;
                 }
             }
             Either::Second(_) => {
+                // watchdog: no command for too long → stop
+                if last_cmd_at.elapsed().as_millis() > WATCHDOG_MS {
+                    if current_left != 0.0 || current_right != 0.0 {
+                        defmt::warn!("watchdog: no command for {}ms, stopping", WATCHDOG_MS);
+                        current_left = 0.0;
+                        current_right = 0.0;
+                        target_left = 0.0;
+                        target_right = 0.0;
+                        skid_steer.set_speed(0.0, 0.0);
+                    }
+                    continue;
+                }
+
                 if current_left == target_left && current_right == target_right {
                     continue;
                 }
