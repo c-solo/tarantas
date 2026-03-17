@@ -48,10 +48,10 @@ pub async fn stdin_task(tx: mpsc::Sender<Command>) {
                 }
             }
             _ = heartbeat.tick() => {
-                if let Some(cmd) = &last_cmd {
-                    if tx.send(cmd.clone()).await.is_err() {
-                        return;
-                    }
+                if let Some(cmd) = &last_cmd
+                    && tx.send(cmd.clone()).await.is_err()
+                {
+                    return;
                 }
             }
         }

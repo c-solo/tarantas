@@ -131,7 +131,7 @@ mod tests {
 
         let cmd = Command::System(SystemCmd::Ping(42));
         Encoder::<Command>::encode(&mut control, cmd.clone(), &mut buf).unwrap();
-        assert!(buf.len() > 0);
+        assert!(!buf.is_empty());
 
         let decoded = Decoder::decode(&mut engine, &mut buf).unwrap();
         assert_eq!(decoded, Some(cmd));

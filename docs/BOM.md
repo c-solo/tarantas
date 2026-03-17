@@ -10,7 +10,7 @@
 
 - [x] Chassis: TR300-P tracked tank (300×240×125mm, aluminum, 5kg load capacity, suspension).
 - [ ] Motors: 2x 37GB520 (12V, 200 RPM, 1:30 gear ratio) with Hall encoders.
-- [ ] Drivers: 1x BTS7960 (IBT-2) 43A.
+- [x] Drivers: 1x BTS7960 (IBT-2) 43A.
 - [ ] ~~PWM expander: PCA9685~~ — not needed, 2 motors driven directly from STM32 PWM.
 
 ## Sensors & Peripherals

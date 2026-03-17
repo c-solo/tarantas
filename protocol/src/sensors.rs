@@ -11,16 +11,22 @@ pub enum I2cSensorCmd {
     },
 }
 
+/// Distance measurement result.
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+#[cfg_attr(feature = "defmt", derive(defmt::Format))]
+pub enum Distance {
+    /// Exact distance in millimeters (reliable range).
+    Mm(u16),
+    /// Beyond sensor range (>1200mm), no obstacle detected.
+    Far,
+}
+
 /// Telemetry data from various sensors.
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 #[cfg_attr(feature = "defmt", derive(defmt::Format))]
 pub enum Data {
-    DistanceFront {
-        mm: u16,
-    },
-    DistanceBack {
-        mm: u16,
-    },
+    DistanceFront(Distance),
+    DistanceBack(Distance),
     /// Wheel encoder odometry. Sent continuously without subscription,
     /// at a fixed interval configured in engine settings (default 100ms).
     Encoder {

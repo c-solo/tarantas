@@ -16,12 +16,14 @@ impl Led {
         Self { name, pin }
     }
 
+    /// Turn LED on (active low: pin LOW = LED on).
     pub fn on(&mut self) {
-        self.pin.set_high();
+        self.pin.set_low();
     }
 
+    /// Turn LED off (active low: pin HIGH = LED off).
     pub fn off(&mut self) {
-        self.pin.set_low();
+        self.pin.set_high();
     }
 }
 

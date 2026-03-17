@@ -11,6 +11,7 @@ opt-level = 'z'
 
 [dependencies]
 engine = { path = "../lib" }
+protocol = { path = "../../protocol", features = ["defmt"] }
 
 embassy-stm32 = { workspace = true }
 embassy-executor = { workspace = true }
@@ -24,3 +25,6 @@ cortex-m-rt = { version = "0.7" }
 cortex-m = { version = "0.7.7", features = ["inline-asm", "critical-section-single-core"] }
 
 embedded-hal-bus.workspace = true
+
+[package.metadata.cargo-machete]
+ignored = ["cortex-m", "cortex-m-rt", "embassy-time"]

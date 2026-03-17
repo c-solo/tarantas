@@ -102,8 +102,8 @@ fn handle_report(report: &Report) {
             } => {
                 info!(left_mm, right_mm, left_speed, right_speed, "encoder");
             }
-            Data::DistanceFront { mm } => info!(mm, "distance front"),
-            Data::DistanceBack { mm } => info!(mm, "distance back"),
+            Data::DistanceFront(d) => info!(?d, "distance front"),
+            Data::DistanceBack(d) => info!(?d, "distance back"),
         },
         Report::Event(event) => match event {
             EngineEvent::Ready => info!("engine ready"),

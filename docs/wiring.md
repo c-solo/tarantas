@@ -63,13 +63,15 @@ to avoid damaging the PA0 pin (it is not 5V-tolerant).*
 
 *Bus: I2C1. Address Conflict Resolution: GPIO Control (XSHUT).*
 
-All sensors share the I2C bus (PB8/PB9). Since VL53L0X and VL6180X share the default address `0x29`, 
-their **XSHUT** pins must be connected to individual GPIOs. The MCU must enable them sequentially 
+All sensors share the I2C bus (PA15/PB9). Since VL53L0X and VL6180X share the default address `0x29`,
+their **XSHUT** pins must be connected to individual GPIOs. The MCU must enable them sequentially
 at startup to assign unique addresses (e.g., `0x30`, `0x31`...).
+
+*> Warning: Do NOT use PB8 for I2C SCL — on WeAct G431 board PB8 is BOOT0. Sensor pull-ups on SCL will pull BOOT0 HIGH and chip enters bootloader instead of running firmware.*
 
 | STM32 Pin | Function | Device                   | Device Pin        |
 |:----------|:---------|:-------------------------|:------------------|
-| **PB8**   | I2C1_SCL | All Sensors              | **SCL**           |
+| **PA15**  | I2C1_SCL | All Sensors              | **SCL**           |
 | **PB9**   | I2C1_SDA | All Sensors              | **SDA**           |
 | **3.3V**  | Power    | All Sensors              | **VIN / VCC**     |
 | **GND**   | Ground   | All Sensors              | **GND**           |
@@ -80,26 +82,51 @@ at startup to assign unique addresses (e.g., `0x30`, `0x31`...).
 
 ### 5. Power
 
-*Dual-battery setup: separate power for motors and electronics to isolate motor noise from Jetson/sensors.*
+*Single battery, two power paths: motors direct, Jetson via DC-DC buck converter.*
 
-| Supply              | Battery                  | Voltage Range    | Feeds                              |
-|:--------------------|:-------------------------|:-----------------|:-----------------------------------|
-| **Motor Battery**   | 4S LiPo 5200mAh 30C+    | 12.0–16.8V       | BTS7960 drivers (B+/B-)           |
-| **Logic Battery**   | 4S LiPo 2200–3000mAh    | 12.0–16.8V       | Jetson DC barrel jack (7-20V), STM32 (via onboard 3.3V reg) |
+| Path       | Source         | Converter  | Voltage    | Feeds                     |
+|:-----------|:---------------|:-----------|:-----------|:--------------------------|
+| **Motors** | 4S LiPo direct | —          | 12.0–16.8V | BTS7960 drivers (B+/B-)   |
+| **Jetson** | 4S LiPo        | DC-DC buck | 12-15V     | Barrel jack (9-20V input) |
+| **STM32**  | Jetson USB     | —          | 5V         | USB-C on WeAct board      |
 
-**Common Ground:** Both battery GND **must** be connected to establish a shared voltage reference for UART.
-Use a short, thick wire (14–16 AWG). If motor PWM noise causes UART glitches, add a ferrite toroid
-on the GND bridge wire (3–5 turns through the core) to filter high-frequency interference while
-preserving the DC ground reference.
+**GND:** Single battery = single GND. STM32 powered from Jetson USB = GND shared automatically.
+No separate GND bridge needed.
 
-**Charging:** Use a parallel charging board (both batteries must be identical 4S) to charge
-from a single charger, or a dual-channel charger (e.g. ISDT D2) for independent balancing.
+**Noise filtering:**
+- 1000uF electrolytic capacitor on buck converter output (before Jetson)
+- 100nF + 100uF on BTS7960 power input
+- Ferrite rings on motor wires at BTS7960 if UART glitches occur
 
-### 6. Miscellaneous (Debug & Status)
+### 6. Component Layout
+
+*Separate power and logic zones to minimize EMI from motor drivers.*
+
+```
+┌──────────────────────────────────────┐
+│  REAR (power zone)                   │
+│  [Battery 4S]  [BTS7960]             │
+│  short thick wires to motors         │
+├──────────────────────────────────────┤
+│  FRONT (logic zone)                  │
+│  [STM32]  [Jetson]  [OAK-D Lite]     │
+│  [Buck converter]  [Sensors]         │
+└──────────────────────────────────────┘
+```
+
+**Rules:**
+- BTS7960 at least 5-10cm away from STM32/Jetson
+- Motor power wires: short, twisted pair (M+/M- together). Never parallel to UART
+- UART wires (PA2/PA3): short (10-15cm), twist TX/GND and RX/GND pairs. Cross power wires at 90° if needed
+- Signal wires (I2C, encoders): 22-26 AWG, away from motor power wires
+- Power wires (battery, motors): 14-18 AWG
+
+### 7. Miscellaneous (Debug & Status)
 
 | STM32 Pin      | Purpose                                                              |
 |:---------------|:---------------------------------------------------------------------|
-| **PC13**       | On-board Blue LED (Active Low). Use for "Heartbeat" indication.      |
+| **PC6**        | On-board Blue LED (Active Low). Use for "Heartbeat" indication.      |
+| **PC13**       | On-board KEY button.                                                 |
 | **G, CLK, IO** | ST-Link V2 header (GND, SWCLK, SWDIO). For flashing and RTT logging. |
 
 ---

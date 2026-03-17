@@ -1,5 +1,4 @@
 use core::cell::RefCell;
-use defmt::warn;
 use embassy_stm32::{
     i2c::{I2c, Master},
     mode::Blocking,
@@ -33,10 +32,13 @@ pub async fn sensor_polling(mut front_dist: DistanceSensor, mut back_dist: Dista
         let now = Instant::now();
 
         if front_dist.ready(now) {
-            match front_dist.read_distance_mm() {
-                Ok(mm) => outbound::TELEMETRY.send(Data::DistanceFront { mm }).await,
+            match front_dist.read_distance() {
+                Ok(d) => {
+                    defmt::debug!("front distance: {:?}", d);
+                    outbound::TELEMETRY.send(Data::DistanceFront(d)).await;
+                }
                 Err(err) => {
-                    warn!("front distance sensor error: {:?}", err);
+                    defmt::warn!("front distance sensor error: {:?}", err);
                     internal::ERROR
                         .send(SystemError::SensorError(I2cSensor::Distance))
                         .await
@@ -46,10 +48,13 @@ pub async fn sensor_polling(mut front_dist: DistanceSensor, mut back_dist: Dista
         };
 
         if back_dist.ready(now) {
-            match back_dist.read_distance_mm() {
-                Ok(mm) => outbound::TELEMETRY.send(Data::DistanceBack { mm }).await,
+            match back_dist.read_distance() {
+                Ok(d) => {
+                    defmt::debug!("back distance: {:?}", d);
+                    outbound::TELEMETRY.send(Data::DistanceBack(d)).await;
+                }
                 Err(e) => {
-                    warn!("back distance sensor error: {:?}", e);
+                    defmt::warn!("back distance sensor error: {:?}", e);
                     internal::ERROR
                         .send(SystemError::SensorError(I2cSensor::Distance))
                         .await;
@@ -81,13 +86,13 @@ pub async fn sensor_polling(mut front_dist: DistanceSensor, mut back_dist: Dista
                     sensor: I2cSensor::Cliff,
                     ..
                 } => {
-                    todo!("cliff sensor subscription not implemented yet");
+                    defmt::warn!("cliff sensor subscription not yet implemented, ignoring");
                 }
                 I2cSensorCmd::SubscribeTo {
                     sensor: I2cSensor::Imu,
                     ..
                 } => {
-                    todo!("imu sensor subscription not implemented yet");
+                    defmt::warn!("imu sensor subscription not yet implemented, ignoring");
                 }
             }
         };

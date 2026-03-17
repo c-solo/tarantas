@@ -16,9 +16,10 @@ use embassy_stm32::{
     time::Hertz,
     usart,
 };
-use embassy_time::{Duration, Timer};
+
 use embedded_hal_bus::i2c::RefCellDevice;
-use engine::drivers::chassis::SkidSteer;
+use engine::{bus::bus::inbound, drivers::chassis::SkidSteer};
+use protocol::sensors::{I2cSensor, I2cSensorCmd};
 
 use defmt as _;
 use defmt_rtt as _;
@@ -40,16 +41,25 @@ use engine::drivers::{
 #[embassy_executor::main]
 async fn main(spawner: Spawner) {
     let p = embassy_stm32::init(Config::default());
-    // System time driver on TIM8
 
-    // Small delay to allow RTT connection to establish
-    Timer::after(Duration::from_millis(10)).await;
+    // Enable debug during sleep so RTT works with WFI (embassy low power).
+    // DMA1 clock keeps SRAM accessible to debugger while CPU sleeps.
+    embassy_stm32::pac::DBGMCU.cr().modify(|w| {
+        w.set_dbg_sleep(true);
+        w.set_dbg_standby(true);
+        w.set_dbg_stop(true);
+    });
+    embassy_stm32::pac::RCC
+        .ahb1enr()
+        .modify(|w| w.set_dma1en(true));
 
-    // Initialize LED
-    let led_pin = Output::new(p.PC13, Level::Low, Speed::Low);
+    defmt::info!("booting tarantas engine");
+
+    // Initialize LED — blink during boot, solid on when ready
+    let led_pin = Output::new(p.PC6, Level::High, Speed::Low);
     let led = led::Led::new("status_led", led_pin);
-
     spawner.spawn(led::led_handler(led)).expect("spawn led");
+    inbound::LED.signal(led::LedCmd::Blink(150));
     spawner.spawn(error::error_handler()).expect("spawn error");
 
     // Initialize UART (serial link to Jetson)
@@ -72,14 +82,16 @@ async fn main(spawner: Spawner) {
     spawner
         .spawn(network::network_tx(tx))
         .expect("spawn network_tx");
+    defmt::info!("uart started");
 
     // Initialize motors
     let skid_steer = SkidSteer::new(p.TIM3, p.PA6, p.PA7, p.TIM4, p.PB6, p.PB7, Hertz::khz(20));
     spawner
         .spawn(chassis::movement_handler(skid_steer))
         .expect("spawn movement");
+    defmt::info!("motors started");
 
-    // Initialize wheel encoder
+    // Initialize wheel encoders
     let left = Qei::new(p.TIM1, p.PA8, p.PA9, Default::default());
     let right = Qei::new(p.TIM2, p.PA0, p.PA1, Default::default());
     let config = WheelEncoderConfig {
@@ -90,13 +102,14 @@ async fn main(spawner: Spawner) {
     spawner
         .spawn(encoder::encoder_handler(wheel_encoders))
         .expect("spawn encoder");
+    defmt::info!("encoders started");
 
     // Initialize I2C sensors
     let mut i2c_cfg = i2c::Config::default();
     i2c_cfg.frequency = Hertz::khz(400);
-    let i2c = i2c::I2c::new_blocking(p.I2C1, p.PB8, p.PB9, i2c_cfg);
-    // Store I2C bus in StaticCell with RefCell for shared access
+    let i2c = i2c::I2c::new_blocking(p.I2C1, p.PA15, p.PB9, i2c_cfg);
     let shared_i2c = sensors::SHARED_I2C.init(RefCell::new(i2c));
+    defmt::info!("i2c bus initialized");
 
     let front_dist_sensor = DistanceSensor::new(
         "front_dist",
@@ -115,4 +128,17 @@ async fn main(spawner: Spawner) {
     spawner
         .spawn(sensors::sensor_polling(front_dist_sensor, back_dist_sensor))
         .expect("spawn sensors");
+
+    // Auto-subscribe distance sensors for testing (1 second interval)
+    // TODO REMOVE
+    inbound::SENSOR_CMD
+        .send(I2cSensorCmd::SubscribeTo {
+            sensor: I2cSensor::Distance,
+            poll_interval_ms: 1000,
+        })
+        .await;
+
+    // Boot complete — solid LED
+    inbound::LED.signal(led::LedCmd::On);
+    defmt::info!("engine ready");
 }

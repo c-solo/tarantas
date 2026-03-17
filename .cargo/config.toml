@@ -1,3 +1,6 @@
+[env]
+DEFMT_LOG = "debug"
+
 [target.thumbv7em-none-eabihf]
 runner = "probe-rs run --chip STM32G431CBUx"
 
@@ -15,7 +18,7 @@ rustflags = [
 # Check firmware with STM32 target
 check_f = "check --target thumbv7em-none-eabihf -p firmware"
 # Build firmware with STM32 target
-flash = "run --target thumbv7em-none-eabihf -p firmware"
+flash = "run --release --target thumbv7em-none-eabihf -p firmware"
 
 # Check engine with STM32 target
 check_e = "check --target thumbv7em-none-eabihf -p engine"
